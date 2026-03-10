@@ -18,19 +18,27 @@ export default function Home() {
     setLoading(true);
     setResultCards([]); // 清空舊的結果
 
+    // 💡 核心優化：建立一個強制等待 1200 毫秒的 Promise
+    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 1200));
+
     try {
-      const res = await fetch("/api/notebooklm/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ topic, audience }),
-      });
+      // 💡 核心優化：利用 Promise.all，同時執行 API 呼叫和強制等待。
+      // 只有當這兩件事都完成時，才會繼續往下跑（確保載入動畫至少持續 1.2 秒）。
+      const [res] = await Promise.all([
+        fetch("/api/notebooklm/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ topic, audience }),
+        }),
+        minLoadingTime, // 強制等待
+      ]);
 
       const data = await res.json();
 
       if (data.result) {
-        // 利用你在 Prompt 裡設定的 "---" 分隔符號，將回傳字串切成獨立的卡片
+        // 利用我在 Prompt 裡設定的 "---" 分隔符號切分
         const cards = data.result
           .split("---")
           .map((str: string) => str.trim())
@@ -79,7 +87,7 @@ export default function Home() {
         {/* 2. 輸入區上方加入版本號 */}
         <div className="flex justify-end mb-1 px-2">
           <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-            v1.0.0
+            v1.0.1
           </span>
         </div>
 
@@ -153,25 +161,34 @@ export default function Home() {
         )}
 
         {/* 6. 結果卡片區 */}
-        {resultCards.length > 0 && (
+        {!loading && resultCards.length > 0 && (
           <div className="space-y-6 pb-10">
             {resultCards.map((cardText, index) => {
-              // 💡 核心邏輯：將第一行當作「畫面標題」，剩下的才是「要複製的內容」
-              const lines = cardText.split("\n");
-              const hasHeader = lines[0].startsWith("###");
+              // 💡 核心邏輯優化：更強大的拆分法
 
-              // 如果有 ### 開頭的標題且不只一行，就把第一行拆出來
-              const displayTitle = hasHeader ? lines[0].replace("### ", "") : "";
-              const copyContent = (hasHeader && lines.length > 1)
-                ? lines.slice(1).join("\n").trim()
-                : cardText.replace("### ", "").trim();
+              // 先把 Gemini 回傳內容裡討厭的 '### ' 去掉（不論出現在哪裡）
+              const cleanCardText = cardText.replace(/^###\s*/gm, "");
+
+              // 找出第一個出現中文冒號 '：' 的位置
+              const colonIndex = cleanCardText.indexOf("：");
+
+              let displayTitle = "";
+              let copyContent = cleanCardText.trim(); // 預設整張卡片都是內容
+
+              // 如果冒號出現在前 20 個字內（通常代表這是一個標題標籤）
+              if (colonIndex !== -1 && colonIndex < 20) {
+                // 冒號前的文字當作「畫面標題」
+                displayTitle = cleanCardText.substring(0, colonIndex).trim();
+                // 冒號後的文字才是「要複製的純內容」
+                copyContent = cleanCardText.substring(colonIndex + 1).trim();
+              }
 
               return (
                 <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border relative group">
 
                   {/* 畫面顯示的藍色小標題 (不會被複製) */}
                   {displayTitle && (
-                    <div className="text-blue-700 font-bold mb-4 pb-3 border-b border-blue-50 flex items-center gap-2">
+                    <div className="text-blue-700 font-bold mb-4 pb-3 border-b border-blue-50 flex items-center gap-2 text-sm">
                       <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
                         {index === 0 ? "建議" : "提示詞"}
                       </span>
@@ -179,10 +196,10 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* 一鍵複製按鈕：只帶入 copyContent */}
+                  {/* 一鍵複製按鈕：只帶入 copyContent (純淨內容！) */}
                   <button
                     onClick={() => handleCopy(copyContent)}
-                    className="absolute top-4 right-4 bg-gray-800 hover:bg-black text-white font-bold text-xs py-2 px-3 rounded-lg shadow-sm transition-all"
+                    className="absolute top-4 right-4 bg-gray-800 hover:bg-black text-white font-bold text-xs py-2 px-3 rounded-lg shadow-sm transition-all flex items-center gap-1"
                   >
                     一鍵複製
                   </button>
