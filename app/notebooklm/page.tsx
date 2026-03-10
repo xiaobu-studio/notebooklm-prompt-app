@@ -23,6 +23,9 @@ export default function Home() {
   // 💡 新增 history 狀態
   const [history, setHistory] = useState<HistoryRecord[]>([]);
 
+  // 👇 新增這個狀態來控制彈出視窗
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // 💡 網頁初次載入時，從 localStorage 讀取紀錄
   useEffect(() => {
     const savedHistory = localStorage.getItem("notebooklm_history");
@@ -137,14 +140,23 @@ export default function Home() {
               <label className="block text-sm font-bold text-blue-900">
                 🔑 您的 Gemini API Key (選填)
               </label>
-              <a
-                href="https://aistudio.google.com/app/apikey"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:text-blue-800 underline font-bold flex items-center gap-1"
-              >
-                👉 點此免費申請專屬 Key
-              </a>
+              {/* 👇 增加了一個 flex 容器把兩個按鈕包起來 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="text-xs text-gray-500 hover:text-gray-800 underline flex items-center gap-1 transition-colors"
+                >
+                  📖 如何申請？
+                </button>
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:text-blue-800 underline font-bold flex items-center gap-1"
+                >
+                  👉 點此免費申請專屬 Key
+                </a>
+              </div>
             </div>
 
             <input
@@ -260,6 +272,47 @@ export default function Home() {
                 <strong>💡 關於紀錄保存：</strong><br />
                 您的生成紀錄僅儲存在此瀏覽器的 <code>localStorage</code> 中，這意味著資料<strong>不會</strong>上傳到雲端伺服器，既保護隱私又能快速讀取。若您清理瀏覽器快取或更換裝置，紀錄將會消失。（最多保留最近 5 筆）
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* 👇 這是全新的教學小視窗 Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <span>📖</span> 如何申請 Gemini API Key？
+                </h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-6 space-y-4 text-sm text-gray-600 leading-relaxed">
+                <ol className="list-decimal list-inside space-y-3 marker:text-blue-500 marker:font-bold">
+                  <li>點擊旁邊的藍色連結前往 <strong>Google AI Studio</strong>。</li>
+                  <li>使用您的 Google 帳號登入。</li>
+                  <li>在畫面左上方點選 <strong className="bg-gray-100 px-1.5 py-0.5 rounded">Get API key</strong>。</li>
+                  <li>點擊藍色按鈕 <strong className="bg-gray-100 px-1.5 py-0.5 rounded">Create API key</strong>。</li>
+                  <li>選擇建立在新的專案 (Create API key in new project)。</li>
+                  <li>複製生成的那串英數字，貼回這裡的密碼框就完成了！</li>
+                </ol>
+                <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-800 mt-6 border border-blue-100 flex gap-2">
+                  <span className="text-base">💡</span>
+                  <p>申請過程<strong>完全免費</strong>，不需要綁定信用卡！每分鐘還有高達 15 次的免費呼叫額度喔。</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 text-right">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm"
+                >
+                  我知道了
+                </button>
+              </div>
             </div>
           </div>
         )}
