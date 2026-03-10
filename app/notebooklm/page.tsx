@@ -29,10 +29,19 @@ export default function Home() {
       ]);
       const data = await res.json();
       if (data.result) {
-        const cards = data.result
-          .split(/\n---\n/)
+        // 1. 更寬容的正則切割 (容許 --- 前後有空白)
+        let cards = data.result
+          .split(/\n\s*---\s*\n/)
           .map((str: string) => str.trim())
           .filter((str: string) => str.length > 0);
+
+        // 💡 終極防禦：我們預期只有 3 張卡片 (建議、第一步、第二步)。
+        // 如果 AI 不聽話切了超過 3 塊，就把第 3 塊以後的所有內容「強制縫合」回第二步！
+        if (cards.length > 3) {
+          const combinedStep2 = cards.slice(2).join("\n\n");
+          cards = [cards[0], cards[1], combinedStep2];
+        }
+
         setResultCards(cards);
       }
     } finally {
@@ -74,7 +83,7 @@ export default function Home() {
         {/* 2. 版本號 (回到右上方小小的) */}
         <div className="flex justify-end mb-1 px-2">
           <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-            v1.0.6
+            v1.0.7
           </span>
         </div>
 
@@ -146,8 +155,12 @@ export default function Home() {
               const displayTitle = isHeader ? firstLine.replace(/^###\s*/, "").trim() : "";
               let copyContent = isHeader ? lines.slice(1).join("\n").trim() : cardText.trim();
 
+              // 💡 終極防禦：不用 split，改找「第一個冒號」的位置，後面的全包！
               if (!copyContent && displayTitle) {
-                copyContent = displayTitle.split("：")[1] || displayTitle;
+                const colonIndex = displayTitle.indexOf("：");
+                copyContent = colonIndex !== -1
+                  ? displayTitle.substring(colonIndex + 1).trim()
+                  : displayTitle;
               }
 
               return (
