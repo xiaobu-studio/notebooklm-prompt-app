@@ -18,8 +18,8 @@ export default function Home() {
     setLoading(true);
     setResultCards([]);
 
-    // 強制動畫至少跑 1.2 秒，增加「小步正在思考」的質感
-    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 1200));
+    // 強制動畫至少跑 1.2 秒，增加質感
+    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 1500));
 
     try {
       const [res] = await Promise.all([
@@ -34,8 +34,9 @@ export default function Home() {
       const data = await res.json();
 
       if (data.result) {
+        // 💡 邏輯優化：改用正則表達式，只有當 --- 獨立成行時才切割，避免內容中途被切斷
         const cards = data.result
-          .split("---")
+          .split(/\n---\n/)
           .map((str: string) => str.trim())
           .filter((str: string) => str.length > 0);
         setResultCards(cards);
@@ -86,7 +87,7 @@ export default function Home() {
         {/* 2. 版本號 */}
         <div className="flex justify-end mb-1 px-2">
           <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-            v1.0.2
+            v1.0.3
           </span>
         </div>
 
@@ -120,8 +121,9 @@ export default function Home() {
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                {/* 旋轉動畫 SVG */}
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <span>小步正在努力撰寫中...</span>
@@ -139,40 +141,38 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="h-3 bg-gray-100 rounded w-full"></div>
                   <div className="h-3 bg-gray-100 rounded w-full"></div>
+                  <div className="h-3 bg-gray-100 rounded w-2/3"></div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* 5. 結果卡片區 (確保 loading 結束後顯示) */}
+        {/* 5. 結果卡片區 */}
         {!loading && resultCards.length > 0 && (
           <div className="space-y-6 pb-10">
             {resultCards.map((cardText, index) => {
-              // 💡 魯棒的拆分邏輯：找第一個冒號
-              const cleanCardText = cardText.replace(/^###\s*/gm, "");
-              const lines = cleanCardText.split('\n');
+              // 💡 邏輯改寫：直接提取第一行作為標題，其餘為內容
+              const lines = cardText.split("\n");
               const firstLine = lines[0].trim();
 
-              let displayTitle = "";
-              let copyContent = cleanCardText;
+              // 檢查第一行是否為標題 (### 開頭)
+              const isHeader = firstLine.startsWith("###");
+              const displayTitle = isHeader ? firstLine.replace(/^###\s*/, "").trim() : "";
 
-              if (firstLine.includes("：")) {
-                const parts = firstLine.split("：");
-                displayTitle = parts[0].trim();
-                // 合併剩餘的第一行內容與其他行
-                const firstLineBody = parts.slice(1).join("：").trim();
-                copyContent = [firstLineBody, ...lines.slice(1)].join("\n").trim();
-              }
+              // 剩下的所有行合併為內容
+              const copyContent = isHeader
+                ? lines.slice(1).join("\n").trim()
+                : cardText.trim();
 
               return (
                 <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border relative group">
                   {displayTitle && (
-                    <div className="text-blue-700 font-bold mb-4 pb-3 border-b border-blue-50 flex items-center gap-2 text-sm">
-                      <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    <div className="text-blue-700 font-bold mb-4 pb-3 border-b border-blue-50 flex items-start gap-2 text-sm">
+                      <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider mt-0.5 shrink-0">
                         {index === 0 ? "建議" : "提示詞"}
                       </span>
-                      {displayTitle}
+                      <span className="leading-relaxed">{displayTitle}</span>
                     </div>
                   )}
 
