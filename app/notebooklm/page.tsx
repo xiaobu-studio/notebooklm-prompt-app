@@ -125,30 +125,46 @@ export default function Home() {
 
         {/* 2. 版本號 */}
         <div className="flex justify-end mb-1 px-2">
-          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.2.0</span>
+          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.3.0</span>
         </div>
 
         {/* 3. 輸入區 */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-5">
 
-          {/* 👇 新增這塊：API Key 設定區 */}
-          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2">
-            <label className="block text-sm font-bold text-blue-900 mb-2">
-              🔑 您的 Gemini API Key (選填)
-            </label>
+          {/* 👇 升級版：API Key 設定與說明區 */}
+          <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 mb-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-bold text-blue-900">
+                🔑 您的 Gemini API Key (選填)
+              </label>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-800 underline font-bold flex items-center gap-1"
+              >
+                👉 點此免費申請專屬 Key
+              </a>
+            </div>
+
             <input
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="AIzaSy..."
-              className="w-full border border-blue-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono bg-white"
+              placeholder="AIzaSy... (若保持空白，將使用系統公用額度)"
+              className="w-full border border-blue-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono bg-white shadow-inner transition-all"
             />
-            <p className="text-xs text-blue-700 mt-2 leading-relaxed">
-              填寫專屬金鑰可避免與他人共用系統額度限制。<br />
-              您的金鑰僅會保存在當前瀏覽器中，絕對不會上傳至我們的伺服器，請安心使用。
-            </p>
+
+            <div className="text-xs text-blue-800 leading-relaxed bg-white/60 p-3 rounded-lg border border-blue-50">
+              <p className="mb-1">
+                <strong className="text-orange-600">⚠️ 公用額度提醒：</strong> 系統內建的公用金鑰為免費版。若您點擊生成後遇到系統無反應，或跳出 <strong>「Too Many Requests / 發生錯誤」</strong>，代表當下使用人數過多，公用額度已耗盡。
+              </p>
+              <p>
+                <strong className="text-green-700">💡 強烈建議：</strong> 填寫您專屬的金鑰！不僅能享有獨立的超大免費額度，生成速度也更穩定。您的金鑰僅會保存在您當前的瀏覽器中，絕對安全。
+              </p>
+            </div>
           </div>
-          {/* 👆 新增結束 */}
+          {/* 👆 升級版結束 */}
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">1. 簡報主題</label>
