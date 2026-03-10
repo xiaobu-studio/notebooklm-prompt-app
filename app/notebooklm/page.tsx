@@ -76,7 +76,14 @@ export default function Home() {
           </p>
         </div>
 
-        {/* 2. 輸入區 */}
+        {/* 2. 輸入區上方加入版本號 */}
+        <div className="flex justify-end mb-1 px-2">
+          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+            v1.0.0
+          </span>
+        </div>
+
+        {/* 3. 輸入區 */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-5">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -122,7 +129,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 3. 載入中的骨架屏 (Skeleton) */}
+        {/* 4. 載入中的骨架屏 (Skeleton) */}
         {loading && (
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -138,14 +145,14 @@ export default function Home() {
           </div>
         )}
 
-        {/* 4. 原本的結果卡片區 (確保 loading 結束後才顯示) */}
+        {/* 5. 原本的結果卡片區 (確保 loading 結束後才顯示) */}
         {!loading && resultCards.length > 0 && (
           <div className="space-y-6 pb-10">
             {/* ... 這裡維持你剛剛改好的卡片邏輯 ... */}
           </div>
         )}
 
-        {/* 4. 結果卡片區 */}
+        {/* 6. 結果卡片區 */}
         {resultCards.length > 0 && (
           <div className="space-y-6 pb-10">
             {resultCards.map((cardText, index) => {
