@@ -1,6 +1,12 @@
 export default function Portal() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            {/* 👇 新增這段圖片代碼 */}
+            <img
+                src="/icon.png"
+                alt="Logo"
+                className="w-24 h-24 rounded-full mb-6 border-4 border-white shadow-md object-cover"
+            />
             <h1 className="text-2xl font-bold mb-8">小步學習：AI 提示詞工具箱</h1>
             <div className="space-y-4">
                 <a href="/notebooklm" className="block p-6 bg-white rounded-xl shadow border hover:border-blue-500 transition-all">

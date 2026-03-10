@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const [topic, setTopic] = useState("");
@@ -55,6 +56,12 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-3xl mx-auto space-y-8">
+        {/* 👇 返回連結 */}
+        <div className="mb-6">
+          <Link href="/" className="text-gray-400 hover:text-blue-600 transition-colors text-sm flex items-center gap-1">
+            ← 返回工具箱首頁
+          </Link>
+        </div>
 
         {/* 1. 標題與視覺區 */}
         <div className="text-center space-y-2 pt-8">
