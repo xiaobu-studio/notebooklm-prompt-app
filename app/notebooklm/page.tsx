@@ -16,6 +16,7 @@ interface HistoryRecord {
 export default function Home() {
   const [topic, setTopic] = useState("");
   const [audience, setAudience] = useState("");
+  const [apiKey, setApiKey] = useState(""); // 💡 新增 API Key 狀態
   const [loading, setLoading] = useState(false);
   const [resultCards, setResultCards] = useState<string[]>([]);
 
@@ -32,6 +33,11 @@ export default function Home() {
         console.error("讀取歷史紀錄失敗", e);
       }
     }
+
+    // 💡 讀取儲存的 API Key
+    const savedKey = localStorage.getItem("notebooklm_api_key");
+    if (savedKey) setApiKey(savedKey);
+
   }, []);
 
   const handleGenerate = async () => {
@@ -45,6 +51,7 @@ export default function Home() {
 
     try {
       const [res] = await Promise.all([
+        // 💡 呼叫 API 時，把 apiKey 也一起包進去
         fetch("/api/notebooklm/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -55,6 +62,10 @@ export default function Home() {
       const data = await res.json();
 
       if (data.result) {
+        // 💡 如果生成成功，就把使用者的 Key 存起來
+        if (apiKey) {
+          localStorage.setItem("notebooklm_api_key", apiKey);
+        }
         let cards = data.result
           .split(/\n\s*---\s*\n/)
           .map((str: string) => str.trim())
@@ -114,11 +125,31 @@ export default function Home() {
 
         {/* 2. 版本號 */}
         <div className="flex justify-end mb-1 px-2">
-          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.1.8</span>
+          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.2.0</span>
         </div>
 
         {/* 3. 輸入區 */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-5">
+
+          {/* 👇 新增這塊：API Key 設定區 */}
+          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-2">
+            <label className="block text-sm font-bold text-blue-900 mb-2">
+              🔑 您的 Gemini API Key (選填)
+            </label>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              className="w-full border border-blue-200 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono bg-white"
+            />
+            <p className="text-xs text-blue-700 mt-2 leading-relaxed">
+              填寫專屬金鑰可避免與他人共用系統額度限制。<br />
+              您的金鑰僅會保存在當前瀏覽器中，絕對不會上傳至我們的伺服器，請安心使用。
+            </p>
+          </div>
+          {/* 👆 新增結束 */}
+
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">1. 簡報主題</label>
             <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="例如：實用的 AI 工作術" className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none" />

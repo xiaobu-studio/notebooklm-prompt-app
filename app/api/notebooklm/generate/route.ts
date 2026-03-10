@@ -2,16 +2,26 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
 // 初始化 Gemini API，會自動抓取你剛才設定在 .env.local 的金鑰
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+//const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: Request) {
     try {
-        // 1. 接收前端傳來的資料 (主題與受眾)
-        const { topic, audience } = await req.json();
+        // 1. 接收前端傳來的資料，新增 apiKey
+        const { topic, audience, apiKey } = await req.json();
 
         if (!topic || !audience) {
             return NextResponse.json({ error: '請提供簡報主題與受眾' }, { status: 400 });
         }
+
+        // 💡 核心改變：優先使用前端傳來的 Key，如果沒有，才用系統預設的 Key (你的 .env)
+        const activeApiKey = apiKey || process.env.GEMINI_API_KEY;
+
+        if (!activeApiKey) {
+            return NextResponse.json({ error: '系統未設定預設金鑰，請在畫面上輸入您的 Gemini API Key' }, { status: 400 });
+        }
+
+        // 💡 動態初始化 Gemini API (每次請求都用正確的鑰匙開門)
+        const genAI = new GoogleGenerativeAI(activeApiKey);
 
         // 2. 設定模型與 System Prompt
         const model = genAI.getGenerativeModel({
