@@ -100,7 +100,7 @@ export default function Home() {
               type="text"
               value={audience}
               onChange={(e) => setAudience(e.target.value)}
-              placeholder="例如：非技術背景的上班族、國中生..."
+              placeholder="例如：上班族、國中生..."
               className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
