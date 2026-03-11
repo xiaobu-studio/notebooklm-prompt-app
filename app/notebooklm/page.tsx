@@ -58,7 +58,7 @@ export default function Home() {
         fetch("/api/notebooklm/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, audience }),
+          body: JSON.stringify({ topic, audience, apiKey }),
         }),
         minLoadingTime,
       ]);
@@ -128,7 +128,7 @@ export default function Home() {
 
         {/* 2. 版本號 */}
         <div className="flex justify-end mb-1 px-2">
-          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.3.1</span>
+          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">v1.3.2</span>
         </div>
 
         {/* 3. 輸入區 */}
